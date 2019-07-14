@@ -1,8 +1,9 @@
+/* eslint-disable no-undef */
 <template>
   <div class="login-wrap">
     <div class="login-form-wrap">
       <div class="login-head">
-        <img src="./logo_index.png" alt="黑马头条">
+        <img src="./logo_index.png" alt="黑马头条" />
       </div>
       <div class="login-form">
         <el-form ref="form" :model="form">
@@ -29,7 +30,7 @@
 
 <script>
 import axios from 'axios'
-import '@/vendor/gt'//
+import '@/vendor/gt'
 export default {
   name: 'Login',
   data () {
@@ -37,7 +38,8 @@ export default {
       form: {
         mobile: '13683109553',
         code: ''
-      }
+      },
+      captchaObj: null
     }
   },
   methods: {
@@ -46,11 +48,33 @@ export default {
     },
     handleSendCode () {
       const { mobile } = this.form
+      if (this.captchaObj) {
+        return this.captchaObj.verify()
+      }
       axios({
         method: 'GET',
         url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${mobile}`
+        // url: `http://toutiao.course.itcast.cn/mp/v1_0/captchas/${mobile}`
       }).then(res => {
-        console.log(res.data)
+        // console.log(res.data)
+        const data = res.data.data
+        window.initGeetest({
+          // 以下配置参数来自服务端 SDK
+          gt: data.gt,
+          challenge: data.challenge,
+          offline: !data.success,
+          new_captcha: data.new_captcha,
+          product: 'bind'
+        }, (captchaObj) => {
+          this.captchaObj = captchaObj
+          // 这里可以调用验证实例 captchaObj 的实例方法
+          captchaObj.onReady(function () {
+          // 验证码ready之后才能调用verify方法显示验证码
+            captchaObj.verify()
+          }).onSuccess(function () {
+            console.log('验证成功了')
+          })
+        })
       })
     }
   }
@@ -66,18 +90,18 @@ export default {
   background-color: #ccc;
   background: url(./login_bg.jpg) no-repeat;
   background-size: cover;
-    .login-head {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 10px;
-    }
-    .login-form-wrap {
+  .login-head {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .login-form-wrap {
     background-color: #fff;
     padding: 20px;
     border-radius: 10px;
-        .btn-login {
-          width: 100%;
-        }
+    .btn-login {
+      width: 100%;
     }
+  }
 }
 </style>
