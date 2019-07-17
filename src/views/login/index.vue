@@ -20,7 +20,7 @@
             </el-col>
           </el-form-item>
           <el-form-item>
-            <el-button class="btn-login" type="primary" @click="onSubmit">立即创建</el-button>
+            <el-button class="btn-login" type="primary" @click="handleLogin">立即创建</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -43,8 +43,30 @@ export default {
     }
   },
   methods: {
-    onSubmit () {
-      console.log('submit!')
+    // 请求登录接口
+    handleLogin () {
+      axios({
+        method: 'POST',
+        url: 'http://ttapi.research.itcast.cn/mp/v1_0/authorizations',
+        data: this.form
+      }).then(res => { // >=200&&<400的状态码（then代表成功）都会进入这里
+        // console.log(res.data)
+        // Element提供的Message消息提示组件
+        this.$message({
+          message: '登录成功',
+          type: 'success'
+        })
+        this.$router.push({
+          // 建议路由跳转都使用路由name去跳转，路由传参非常方便
+          name: 'home'
+        })
+      }).catch((error) => {
+        console.log(error)
+        this.$message.error('登录失败，手机号或者验证码错误')
+        if (error.response.status === 400) {
+          this.$message.error('登录失败，手机号或验证码错误')
+        }
+      })
     },
     // 点击发送验证码按钮的事件处理程序
     handleSendCode () {
