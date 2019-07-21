@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 <template>
   <div class="login-wrap">
     <div class="login-form-wrap">
@@ -6,21 +5,28 @@
         <img src="./logo_index.png" alt="黑马头条" />
       </div>
       <div class="login-form">
-        <el-form ref="form" :model="form">
-          <el-form-item>
+        <!-- 表单验证：
+        rules配置验证规则;
+        ref获取表单组件，可以手动调用表单组件的验证方法;-->
+        <el-form :model="form" :rules="rules" ref="ruleForm">
+          <el-form-item prop="mobile">
             <el-input v-model="form.mobile" placeholder="手机号"></el-input>
           </el-form-item>
-          <el-form-item>
+          <el-form-item prop="code">
             <!-- 支持栅格布局，一共24列 -->
             <el-col :span="10">
               <el-input v-model="form.code" placeholder="验证码"></el-input>
             </el-col>
             <el-col :span="10" :offset="2">
-              <el-button @click="handleSendCode">发送验证码</el-button>
+              <el-button @click="handleSendCode">获取验证码</el-button>
             </el-col>
           </el-form-item>
           <el-form-item>
-            <el-button class="btn-login" type="primary" @click="handleLogin">立即创建</el-button>
+            <el-button class="btn-login"
+            type="primary"
+            @click="handleLogin"
+            :loading="loginLoading"
+            >登录</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -32,19 +38,42 @@
 import axios from 'axios'
 import '@/vendor/gt'
 export default {
-  name: 'Login',
+  name: 'AppLogin',
   data () {
     return {
       form: {
         mobile: '',
         code: ''
       },
-      captchaObj: null
+      loginLoading: false, // 登录按钮loading状态默认是false不禁用
+      rules: {
+        mobile: [
+          { required: true, message: '请输入手机号', trigger: 'blur' },
+          { len: 11, message: '长度必须是11个字符', trigger: 'blur' }
+        ],
+        code: [
+          { required: true, message: '请输入验证码', trigger: 'blur' },
+          { len: 6, message: '长度必须为6个字符', trigger: 'blur' }
+        ]
+      },
+      captchaObj: null // 通过initGeetest得到极验验证码对象
     }
   },
   methods: {
     // 请求登录接口
     handleLogin () {
+      // 表单组件有一个方法validate可以用于获取当前表单的验证状态
+      this.$refs['ruleForm'].validate(valid => {
+        if (!valid) {
+          return
+        }
+        // 表单验证通过，可以发请求登录了
+        this.submitlogin()
+      })
+    },
+    // 这里是封装了axios发送的登录请求，必须判断表单验证通过了，再调用这个发请求登录
+    submitlogin () {
+      this.loginLoading = true
       axios({
         method: 'POST',
         url: 'http://ttapi.research.itcast.cn/mp/v1_0/authorizations',
@@ -56,21 +85,22 @@ export default {
           message: '登录成功',
           type: 'success'
         })
+        this.loginLoading = false
         this.$router.push({
           // 建议路由跳转都使用路由name去跳转，路由传参非常方便
           name: 'home'
         })
       }).catch((error) => {
-        console.log(error)
-        this.$message.error('登录失败，手机号或者验证码错误')
+        // console.log(error)
         if (error.response.status === 400) {
           this.$message.error('登录失败，手机号或验证码错误')
         }
+        this.loginLoading = false
       })
     },
     // 点击发送验证码按钮的事件处理程序
     handleSendCode () {
-      // ①取出文本框对象中的号码
+    // ①取出文本框对象中的号码
       const { mobile } = this.form
       // ②当product参数为bind时，可以调用极验验证接口
       if (this.captchaObj) {
@@ -80,14 +110,14 @@ export default {
       axios({
         method: 'GET',
         url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${mobile}`
-        // url: `http://toutiao.course.itcast.cn/mp/v1_0/captchas/${mobile}`
+      // url: `http://toutiao.course.itcast.cn/mp/v1_0/captchas/${mobile}`
       }).then(res => {
-        // console.log(res.data)
-        // 返回的数据为res.data,取出res.data中的data对象
+      // console.log(res.data)
+      // 返回的数据为res.data,取出res.data中的data对象
         const data = res.data.data
         // 极验初始化
         window.initGeetest({
-          // 以下配置参数来自服务端 SDK
+        // 以下配置参数来自服务端 SDK
           gt: data.gt,
           challenge: data.challenge,
           offline: !data.success,
@@ -104,21 +134,22 @@ export default {
           }).onSuccess(function () {
           // console.log(captchaObj.getValidate())
             const {
-              // 解构赋值取出后，接口中重名取的别名
+            // 解构赋值取出后，接口中重名取的别名
               geetest_challenge: challenge,
               geetest_seccode: seccode,
               geetest_validate: validate } =
            captchaObj.getValidate()
            // getValidate方法 获取用户进行成功验证(onSuccess)所得到的结果，该结果用于进行服务端 SDK 进行二次验证。
             axios({
-              method: '',
+              method: 'GET',
               url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${mobile}`,
               parmas: {// axios发get请求时，专门用来传递query查询字符串参数
                 challenge,
                 seccode,
                 validate
-
               }
+            }).then(res => {
+              console.log(res.data)
             })
           })
         })
@@ -127,7 +158,6 @@ export default {
   }
 }
 </script>
-
 <style lang='less' scoped>
 .login-wrap {
   height: 100%;
