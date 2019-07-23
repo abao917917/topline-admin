@@ -53,6 +53,7 @@ export default {
         agree: '' // 是否同意用户协议
       },
       loginLoading: false, // 登录按钮loading状态默认是false不禁用
+      // 配置各种验证规则
       rules: {
         mobile: [
           { required: true, message: '请输入手机号', trigger: 'blur' },
@@ -64,6 +65,7 @@ export default {
         ],
         agree: [
           { required: true, message: '请同意用户协议', trigger: 'change' },
+          // 表单验证部分，表单里的验证规则
           { pattern: /true/, message: '请同意用户协议', trigger: 'change' }
         ]
 
@@ -115,6 +117,16 @@ export default {
     },
     // 点击发送验证码按钮的事件处理程序
     handleSendCode () {
+      // 校验手机号码是否有效，有效才会人机交互验证
+      this.$refs['ruleForm'].validateField('mobile', errorMessage => {
+        // 手机号码验证判断，正确后才能显示人机交互
+        if (errorMessage.trim().length > 0) {
+          return
+        }
+        this.showGeetest()
+      })
+    },
+    showGeetest () {
       // ①取出文本框对象中的号码
       const { mobile } = this.form
       // ②当product参数为bind时，可以调用极验验证接口
