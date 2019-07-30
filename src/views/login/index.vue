@@ -57,7 +57,7 @@ export default {
   data () {
     return {
       form: {
-        mobile: '13683109553',
+        mobile: '',
         code: '',
         agree: '' // 是否同意用户协议
       },
@@ -107,6 +107,7 @@ export default {
         data: this.form
       })
         .then(res => {
+          window.localStorage.setItem('user_info', JSON.stringify(res.data.data))
           // >=200&&<400的状态码（then代表成功）都会进入这里
           // console.log(res.data)
           // Element提供的Message消息提示组件
