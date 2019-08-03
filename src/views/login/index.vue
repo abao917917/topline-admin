@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+// import axios from 'axios'
 import '@/vendor/gt'
 const initCodeSeconds = 10
 export default {
@@ -101,9 +101,9 @@ export default {
     // 这里是封装了axios发送的登录请求，必须判断表单验证通过了，再调用这个发请求登录
     submitlogin () {
       this.loginLoading = true
-      axios({
+      this.$http({
         method: 'POST',
-        url: 'http://ttapi.research.itcast.cn/mp/v1_0/authorizations',
+        url: '/authorizations',
         data: this.form
       })
         .then(res => {
@@ -166,9 +166,9 @@ export default {
       const { mobile } = this.form
 
       // ③发送请求,请求线上接口
-      axios({
+      this.$http({
         method: 'GET',
-        url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${this.form.mobile}`
+        url: `/captchas/${mobile}`
         // url: `http://toutiao.course.itcast.cn/mp/v1_0/captchas/${mobile}`
       }).then(res => {
         // console.log(res.data)
@@ -207,9 +207,9 @@ export default {
                 } = captchaObj.getValidate()
                 // getValidate方法 获取用户进行成功验证(onSuccess)所得到的结果，该结果用于进行服务端 SDK 进行二次验证。
                 // 请求发送验证码接口，发短信
-                axios({
+                this.$http({
                   method: 'GET',
-                  url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${mobile}`,
+                  url: `/sms/codes/${this.from.mobile}`,
                   parmas: {
                     // axios发get请求时，专门用来传递query查询字符串参数
                     challenge,

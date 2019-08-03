@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-
+// eslint-disable-next-line
+import nprogress from 'nprogress'
 Vue.use(Router)
 
 const router = new Router({
@@ -43,13 +44,14 @@ router.beforeEach((to, from, next) => {
   // 如果是非/login页面，判断其登录状态,可以用路由的name判断，console.log(to)打印出来有name项
   // 但是防止组件没有名字，用path判断更保险；
   /** 设置导航拦截的判断思路——
-   *  1.如果不是登录页面分两种情况：
-   *     ① 如果不是登录页，没有登录信息，直接拦截跳转到登录页；
-   *     ② 如果不是登录页，但是登录了，则允许点击跳到任何页面
+   *  1.如果非登录页面分两种情况：
+   *     ① 如果非登录页，没有登录信息，直接拦截跳转到登录页；
+   *     ② 如果非登录页，但是登录了，则允许点击跳到任何页面
    *  2.如果是登录页面分两种情况：
-   *     ①已经登录了，不允许访问登录页
+   *     ①已经登录了，阻断跳转到登录页， 不允许访问登录页
    *     ②没有登录，才允许访问登录页
    */
+  nprogress.start()
   const userInfo = window.localStorage.getItem('user_info')
   if (to.path !== '/login') {
     if (!userInfo) {
@@ -69,4 +71,8 @@ router.beforeEach((to, from, next) => {
   }
 })
 
+// 路由导航完成的时候会进入这里
+router.afterEach((to, from) => {
+  nprogress.done()
+})
 export default router
