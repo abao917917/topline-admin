@@ -55,7 +55,7 @@
 </template>
 
 <script>
-const userInfo = JSON.parse(window.localStorage.getItem('user_info'))
+// const userInfo = JSON.parse(window.localStorage.getItem('user_info'))
 export default {
   name: 'ArticleList',
   data () {
@@ -101,7 +101,7 @@ export default {
       method: 'GET',
       url: '/articles',
       headers: {
-        Authorization: `Bearer ${userInfo.token}`
+        // Authorization: `Bearer ${userInfo.token}`
       }
     }).then(res => {
       console.log(res)
