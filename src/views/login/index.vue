@@ -106,8 +106,8 @@ export default {
         url: '/authorizations',
         data: this.form
       })
-        .then(res => {
-          window.localStorage.setItem('user_info', JSON.stringify(res.data.data))
+        .then(data => {
+          window.localStorage.setItem('user_info', JSON.stringify(data))
           // >=200&&<400的状态码（then代表成功）都会进入这里
           // console.log(res.data)
           // Element提供的Message消息提示组件
@@ -170,10 +170,10 @@ export default {
         method: 'GET',
         url: `/captchas/${mobile}`
         // url: `http://toutiao.course.itcast.cn/mp/v1_0/captchas/${mobile}`
-      }).then(res => {
+      }).then(data => {
         // console.log(res.data)
         // 返回的数据为res.data,取出res.data中的data对象
-        const data = res.data.data
+        // const data = res.data.data
         // 极验初始化
         // 使用初始化函数 initGeetest 初始化后，它的第二个参数是一个回调，回调的第一个参数即是验证实例
         window.initGeetest(
@@ -216,7 +216,7 @@ export default {
                     seccode,
                     validate
                   }
-                }).then(res => {
+                }).then(data => {
                   // 发送短信后开始倒计时
                   this.codeCountDown()
                 })

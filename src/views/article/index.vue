@@ -103,8 +103,8 @@ export default {
       headers: {
         // Authorization: `Bearer ${userInfo.token}`
       }
-    }).then(res => {
-      console.log(res)
+    }).then(data => {
+      console.log(data)
     })
   },
   methods: {

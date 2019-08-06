@@ -31,11 +31,10 @@ axios.interceptors.request.use(config => {
   return Promise.reject(error)
 })
 // Axios响应拦截器
-axios.interceptors.response.use(response => {
-  // Do something with response data
-  return response
-}, error => {
-  // Do something with response error
+axios.interceptors.response.use(response => { // >=200&<400
+  console.log('response=>', response)
+  return response.data.data
+}, error => { // 400的状态码会进入这里
   return Promise.reject(error)
 })
 Vue.prototype.$http = axios
