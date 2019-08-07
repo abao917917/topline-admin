@@ -20,21 +20,30 @@ axios.defaults.baseURL = 'http://ttapi.research.itcast.cn/mp/v1_0/'
 // 所有使用axios发起的请求都要先经过这里
 axios.interceptors.request.use(config => {
   const userInfo = JSON.parse(window.localStorage.getItem('user_info'))
-  console.log('有请求经过了')
-  console.log(config)
+  // 如果登录了，才给那些除此之外的接口添加token令牌；
+  if (userInfo) {
+    // config是本次请求相关的配置对象,打印出来是一个对象，在对象headers中加入token令牌；
+    config.headers.Authorization = `Bearer ${userInfo.token}`
+  }
   // return  config就是允许通过的方式
-  // configs是本次请求相关的配置对象,打印出来是一个对象，在对象headers中加入token令牌；
-  config.headers.Authorization = `Bearer ${userInfo.token}`
   return config
 }, error => {
-  // Do something with request error
   return Promise.reject(error)
 })
 // Axios响应拦截器
 axios.interceptors.response.use(response => { // >=200&<400
-  console.log('response=>', response)
+  // console.log('response=>', response)
   return response.data.data
-}, error => { // 400的状态码会进入这里
+},
+error => { // >=400的状态码会进入这里
+  const status = error.response.status
+  if (status === 401) {
+    // 务必删除本地存储中的用户信息数据，才能实现跳转回登录页
+    window.localStorage.removeItem('user_info')
+    router.push({
+      name: 'login'
+    })
+  }
   return Promise.reject(error)
 })
 Vue.prototype.$http = axios
